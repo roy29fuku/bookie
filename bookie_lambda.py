@@ -2,9 +2,9 @@ import time
 import os
 from os.path import join, dirname
 from urllib.error import HTTPError
+from dotenv import load_dotenv
 
 import bottlenose
-from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 
 dotenv_path = join(dirname(__file__), '.env')
