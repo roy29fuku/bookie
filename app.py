@@ -15,7 +15,7 @@ BOOKIE_AWS_SECRET_ACCESS_KEY = os.environ.get("BOOKIE_AWS_SECRET_ACCESS_KEY")
 def error_handler(err):
     ex = err['exception']
     if isinstance(ex, HTTPError) and ex.code == 503:
-        time.sleep(1) # 1秒待つ
+        time.sleep(1)
         return True
 
 
