@@ -19,7 +19,6 @@ def error_handler(err):
         return True
 
 
-
 def get_categories(soup):
     nodes = soup.find('browsenodes').find_all('browsenode', recursive=False)
     categories = []
