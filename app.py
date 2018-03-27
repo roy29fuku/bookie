@@ -19,24 +19,34 @@ def error_handler(err):
         return True
 
 
+def get_review(soup):
+    # TODO: 全角スペーストリム
+    # TODO: editorialreview以外にもっと良い説明文が取得できないか検討
+    nodes = soup.find('editorialreviews').find_all('editorialreview')
+    result = ''
+    for node in nodes:
+        review = node.find_all('content')
+        review = ''.join([r.text for r in review])
+        result += review
+    return result
+
+
 def get_categories(soup):
     nodes = soup.find('browsenodes').find_all('browsenode', recursive=False)
-    categories = []
+    result = []
     for node in nodes:
         names = node.find_all('name', recursive=False)
         names = [n.text for n in names]
-        categories.extend(names)
-    return categories
+        result.extend(names)
+    return result
 
 
 @app.route('/')
 def index():
-
-    return {'message': BOOKIE_AWS_ASSOCIATE_TAG}
-    # return {'message': 'Hi, This is bookie API server!'}
+    return {'message': 'Hi, This is bookie API server!'}
 
 
-@app.route('/isbn/{isbn}')
+@app.route('/isbn/{isbn}', methods=['GET'])
 def get_isbn(isbn):
     amazon = bottlenose.Amazon(
         BOOKIE_AWS_ACCESS_KEY_ID,
@@ -47,7 +57,7 @@ def get_isbn(isbn):
     )
     response = amazon.ItemLookup(
         ItemId=isbn,
-        ResponseGroup="Images,ItemAttributes,BrowseNodes",
+        ResponseGroup="Images,ItemAttributes,BrowseNodes,EditorialReview",
         SearchIndex="Books",
         IdType="ISBN")
     soup = BeautifulSoup(response, 'lxml')
@@ -55,18 +65,15 @@ def get_isbn(isbn):
     author = soup.find('author').text
     label = soup.find('label').text
     categories = get_categories(soup)
+    review = get_review(soup)
     large_image_url = soup.find('largeimage').text
-    print(isbn)
-    print(title)
-    print(author)
-    print(label)
-    print(categories)
-    print(large_image_url)
     return {
         'isbn': isbn,
         'title': title,
         'author': author,
+        'label': label,
         'categories': categories,
+        'review': review,
         'large_image_url': large_image_url
     }
 
