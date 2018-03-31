@@ -11,6 +11,7 @@ app.debug = True
 BOOKIE_AWS_ASSOCIATE_TAG = os.environ.get("BOOKIE_AWS_ASSOCIATE_TAG")
 BOOKIE_AWS_ACCESS_KEY_ID = os.environ.get("BOOKIE_AWS_ACCESS_KEY_ID")
 BOOKIE_AWS_SECRET_ACCESS_KEY = os.environ.get("BOOKIE_AWS_SECRET_ACCESS_KEY")
+# TODO: chalice localだとconfig.jsonを環境変数から読み取らないので適宜設定する必要があるので修正
 
 
 def error_handler(err):
