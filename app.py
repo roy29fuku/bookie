@@ -6,6 +6,7 @@ import bottlenose
 from bs4 import BeautifulSoup
 
 app = Chalice(app_name='bookie')
+app.debug = True
 
 BOOKIE_AWS_ASSOCIATE_TAG = os.environ.get("BOOKIE_AWS_ASSOCIATE_TAG")
 BOOKIE_AWS_ACCESS_KEY_ID = os.environ.get("BOOKIE_AWS_ACCESS_KEY_ID")
@@ -17,6 +18,35 @@ def error_handler(err):
     if isinstance(ex, HTTPError) and ex.code == 503:
         time.sleep(1)
         return True
+
+
+def get_profile(soup):
+    profile = {}
+    try:
+        profile['title'] = soup.find('title').text
+    except:
+        profile['title'] = ''
+    try:
+        profile['author'] = soup.find('author').text
+    except:
+        profile['author'] = ''
+    try:
+        profile['label'] = soup.find('label').text
+    except:
+        profile['label'] = ''
+    try:
+        profile['categories'] = get_categories(soup)
+    except:
+        profile['categories'] = []
+    try:
+        profile['review'] = get_review(soup)
+    except:
+        profile['review'] = ''
+    try:
+        profile['large_image_url'] = soup.find('largeimage').text
+    except:
+        profile['large_image_url'] = ''
+    return profile
 
 
 def get_review(soup):
@@ -54,31 +84,39 @@ def get_isbn(isbn):
     :param isbn: ISBN-10（10桁の数字）
     :return:
     """
-    amazon = bottlenose.Amazon(
-        BOOKIE_AWS_ACCESS_KEY_ID,
-        BOOKIE_AWS_SECRET_ACCESS_KEY,
-        BOOKIE_AWS_ASSOCIATE_TAG,
-        Region='JP',
-        ErrorHandler=error_handler
-    )
-    response = amazon.ItemLookup(
-        ItemId=isbn,
-        ResponseGroup="Images,ItemAttributes,BrowseNodes,EditorialReview",
-        SearchIndex="Books",
-        IdType="ISBN")
+    try:
+        amazon = bottlenose.Amazon(
+            AWSAccessKeyId=BOOKIE_AWS_ACCESS_KEY_ID,
+            AWSSecretAccessKey=BOOKIE_AWS_SECRET_ACCESS_KEY,
+            AssociateTag=BOOKIE_AWS_ASSOCIATE_TAG,
+            Region='JP',
+            ErrorHandler=error_handler
+        )
+    except Exception as e:
+        print(e)
+
+    try:
+        response = amazon.ItemLookup(
+            ItemId=isbn,
+            ResponseGroup="Images,ItemAttributes,BrowseNodes,EditorialReview",
+            SearchIndex="Books",
+            IdType="ISBN")
+    except Exception as e:
+        print(e)
+
     soup = BeautifulSoup(response, 'lxml')
-    title = soup.find('title').text
-    author = soup.find('author').text
-    label = soup.find('label').text
-    categories = get_categories(soup)
-    review = get_review(soup)
-    large_image_url = soup.find('largeimage').text
+    profile = get_profile(soup)
     return {
         'isbn': isbn,
-        'title': title,
-        'author': author,
-        'label': label,
-        'categories': categories,
-        'review': review,
-        'large_image_url': large_image_url
+        'title': profile['title'],
+        'author': profile['author'],
+        'label': profile['label'],
+        'categories': profile['categories'],
+        'review': profile['review'],
+        'large_image_url': profile['large_image_url']
     }
+
+
+if __name__ == '__main__':
+    isbn = '4040800206'
+    get_isbn(isbn)

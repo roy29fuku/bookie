@@ -9,9 +9,10 @@ from bs4 import BeautifulSoup
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-AWS_ASSOCIATE_TAG = os.environ.get("AWS_ASSOCIATE_TAG")
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+BOOKIE_AWS_ASSOCIATE_TAG = os.environ.get("AWS_ASSOCIATE_TAG")
+BOOKIE_AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+BOOKIE_AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
 
 
 def error_handler(err):
@@ -32,20 +33,23 @@ def get_categories(soup):
 
 
 if __name__ == '__main__':
+    print('amazon')
     amazon = bottlenose.Amazon(
-        AWS_ACCESS_KEY_ID,
-        AWS_SECRET_ACCESS_KEY,
-        AWS_ASSOCIATE_TAG,
+        BOOKIE_AWS_ASSOCIATE_TAG,
+        BOOKIE_AWS_ACCESS_KEY_ID,
+        BOOKIE_AWS_SECRET_ACCESS_KEY,
         Region='JP',
         ErrorHandler=error_handler
     )
-    isbn = '4040800206'
+    isbn = '4863133987'
+    print('res')
     response = amazon.ItemLookup(
         ItemId=isbn,
         ResponseGroup="Images,ItemAttributes,BrowseNodes",
         SearchIndex="Books",
         IdType="ISBN")
 
+    print('soup')
     soup = BeautifulSoup(response, 'lxml')
 
     title = soup.find('title').text
