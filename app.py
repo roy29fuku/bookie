@@ -48,6 +48,12 @@ def index():
 
 @app.route('/isbn/{isbn}', methods=['GET'])
 def get_isbn(isbn):
+    """
+    書籍のISBNをパラメータにして叩くと、Amazon.co.jpから書籍情報を取得
+    これをJSON形式でreturn
+    :param isbn: ISBN-10（10桁の数字）
+    :return:
+    """
     amazon = bottlenose.Amazon(
         BOOKIE_AWS_ACCESS_KEY_ID,
         BOOKIE_AWS_SECRET_ACCESS_KEY,
@@ -76,24 +82,3 @@ def get_isbn(isbn):
         'review': review,
         'large_image_url': large_image_url
     }
-
-
-# The view function above will return {"hello": "world"}
-# whenever you make an HTTP GET request to '/'.
-#
-# Here are a few more examples:
-#
-# @app.route('/hello/{name}')
-# def hello_name(name):
-#    # '/hello/james' -> {"hello": "james"}
-#    return {'hello': name}
-#
-# @app.route('/users', methods=['POST'])
-# def create_user():
-#     # This is the JSON body the user sent in their POST request.
-#     user_as_json = app.current_request.json_body
-#     # We'll echo the json body back to the user in a 'user' key.
-#     return {'user': user_as_json}
-#
-# See the README documentation for more examples.
-#
